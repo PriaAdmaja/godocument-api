@@ -1,9 +1,9 @@
 const db = require('../configs/posgresql');
 
-const createUsers = (email, password, name) => {
+const createUsers = (email, password, name, role) => {
     return new Promise((resolve, reject) => {
-        const sql = `insert into users ("email", "password", "name") values ($1, $2, $3) returning email;`;
-        const values = [email, password, name];
+        const sql = `insert into users ("email", "password", "name", "role) values ($1, $2, $3, $4) returning email;`;
+        const values = [email, password, name, role];
         db.query(sql, values, (err, result) => {
             if(err) {
                 return reject(err);
