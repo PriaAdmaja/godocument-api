@@ -15,7 +15,7 @@ const createUsers = (email, password, name, role) => {
 
 const checkEmail = (email) => {
   return new Promise((resolve, reject) => {
-    const sql = `select email, name, id, avatarUrl, password from users u where email = $1;`;
+    const sql = `select email, name, id, avatar_url, password from users u where email = $1;`;
     db.query(sql, [email], (err, result) => {
       if (err) {
         reject(err);
@@ -28,22 +28,22 @@ const checkEmail = (email) => {
 
 const editUsers = (body, id) => {
   return new Promise((resolve, reject) => {
-    const { password, name, role } = body;
+    const { name, biodata, avatarUrl } = body;
     const dataAvail = [];
-    if (password && password !== ' ') {
-      dataAvail.push("password=");
-    }
-    if (name && name !== ' ') {
+    
+    if (name && name !== '') {
       dataAvail.push("name=");
     }
-    if (role && role !== ' ') {
-      dataAvail.push("role=");
+    if(avatarUrl && avatarUrl !== '') {
+      dataAvail.push("avatar_url=");
+    }
+    if(biodata && biodata !== '') {
+      dataAvail.push("biodata=");
     }
     const dataQuery = dataAvail.map((data, i) => `${data}$${i + 1}`).join(`, `);
-    const rawValues = [password, name, role, id];
+    const rawValues = [name, avatarUrl, biodata, id];
     const values = rawValues.filter((d) => d);
-    let sql = `update users set ${dataQuery} where id=$${values.length} returning email, name, role;`;
-    console.log(sql);
+    let sql = `update users set ${dataQuery} where id=$${values.length} returning email, name, biodata;`;
     db.query(sql, values, (err, result) => {
       if (err) {
         reject(err);

@@ -90,7 +90,7 @@ const login = async (req, res) => {
           id: dbData.id,
           email: dbData.email,
           name: dbData.name,
-          avatar: dbData.avatarUrl,
+          avatar: dbData.avatar_url,
           role: dbData.role,
         },
       });
@@ -119,8 +119,18 @@ const editUsers = async (req, res) => {
   }
 };
 
+const editPassword = (req, res) => {
+  try {
+    const {body, params} = req;
+
+  } catch (error) {
+    
+  }
+}
+
 module.exports = {
   createUsers,
   login,
-  editUsers
+  editUsers,
+  editPassword
 };
