@@ -119,12 +119,29 @@ const editUsers = async (req, res) => {
   }
 };
 
-const editPassword = (req, res) => {
+const editPassword = async(req, res) => {
   try {
     const {body, params} = req;
+    const {newPassword, oldPassword} = body
+    //check password
+    const dbPassword = await userModels.checkPassword(params.id);
+    const checkPassword = await bcrypt.compare(oldPassword, dbPassword.rows[0].password);
+    if (!checkPassword) {
+      return res.status(401).json({
+        msg: "Try with another password",
+      });
+    }
 
+    //change password
+    await userModels.changePassword(newPassword, params.id)
+    res.status(201).json({
+      msg: "Password changed",
+    });
   } catch (error) {
-    
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
   }
 }
 

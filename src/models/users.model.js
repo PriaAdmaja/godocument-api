@@ -15,8 +15,21 @@ const createUsers = (email, password, name, role) => {
 
 const checkEmail = (email) => {
   return new Promise((resolve, reject) => {
-    const sql = `select email, name, id, avatar_url, password from users u where email = $1;`;
+    const sql = `select email, name, id, avatar_url from users u where email = $1;`;
     db.query(sql, [email], (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
+const checkPassword = (id) => {
+  return new Promise((resolve, reject) => {
+    const sql = `select password from users u where id = $1;`;
+    db.query(sql, [id], (err, result) => {
       if (err) {
         reject(err);
         return;
@@ -51,8 +64,23 @@ const editUsers = (body, id) => {
   });
 };
 
+const changePassword = (newPassword, id) => {
+  return new Promise((resolve, reject) => {
+    const sql = `update users set password=$1 where id=$2 returning id;`;
+    db.query(sql, [newPassword, id], (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    })
+  })
+}
+
 module.exports = {
   createUsers,
   checkEmail,
-  editUsers
+  checkPassword,
+  editUsers,
+  changePassword
 };
