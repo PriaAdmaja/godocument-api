@@ -28,20 +28,17 @@ const checkEmail = (email) => {
 
 const editUsers = (body, id) => {
   return new Promise((resolve, reject) => {
-    const { name, biodata, avatarUrl } = body;
+    const { name, biodata } = body;
     const dataAvail = [];
     
     if (name && name !== '') {
       dataAvail.push("name=");
     }
-    if(avatarUrl && avatarUrl !== '') {
-      dataAvail.push("avatar_url=");
-    }
     if(biodata && biodata !== '') {
       dataAvail.push("biodata=");
     }
     const dataQuery = dataAvail.map((data, i) => `${data}$${i + 1}`).join(`, `);
-    const rawValues = [name, avatarUrl, biodata, id];
+    const rawValues = [name, biodata, id];
     const values = rawValues.filter((d) => d);
     let sql = `update users set ${dataQuery} where id=$${values.length} returning email, name, biodata;`;
     db.query(sql, values, (err, result) => {
