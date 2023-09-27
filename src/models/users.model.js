@@ -26,7 +26,36 @@ const checkEmail = (email) => {
   });
 };
 
+const editUsers = (body, id) => {
+  return new Promise((resolve, reject) => {
+    const { password, name, role } = body;
+    const dataAvail = [];
+    if (password && password !== ' ') {
+      dataAvail.push("password=");
+    }
+    if (name && name !== ' ') {
+      dataAvail.push("name=");
+    }
+    if (role && role !== ' ') {
+      dataAvail.push("role=");
+    }
+    const dataQuery = dataAvail.map((data, i) => `${data}$${i + 1}`).join(`, `);
+    const rawValues = [password, name, role, id];
+    const values = rawValues.filter((d) => d);
+    let sql = `update users set ${dataQuery} where id=$${values.length} returning email, name, role;`;
+    console.log(sql);
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
 module.exports = {
   createUsers,
-  checkEmail
+  checkEmail,
+  editUsers
 };

@@ -103,7 +103,24 @@ const login = async (req, res) => {
   }
 };
 
+const editUsers = async (req, res) => {
+  try {
+    const { body, params } = req;
+    const result = await userModels.editUsers(body, params.id);
+    res.status(201).json({
+      data: result.rows,
+      msg: "Account updated",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   createUsers,
   login,
+  editUsers
 };
