@@ -302,14 +302,29 @@ const resetPassword = async (req, res) => {
   };
 };
 
-// const deleteUser = asyng(req, res) => {
-//   try {
-//     const { id } = req.params;
+const deleteUser = async(req, res) => {
+  try {
+    const { id } = req.params;
+    //check user availability
+    const userData = await userModels.getUserData(id);
+    if(!userData.rows[0]) {
+      return res.status(404).json({
+        msg: 'User not found!'
+      });
+    };
+    //deleting user
+    await userModels.deleteUser(id)
+    res.status(200).json({
+      msg: "Success deleting user",
+    });
 
-//   } catch (error) {
-    
-//   }
-// }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+}
 
 module.exports = {
   getDataAllUser,
@@ -321,5 +336,6 @@ module.exports = {
   editPassword,
   privateAccess,
   reqResetPassword,
-  resetPassword
+  resetPassword,
+  deleteUser
 };

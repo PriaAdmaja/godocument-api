@@ -110,6 +110,19 @@ const changePassword = (newPassword, id) => {
   });
 };
 
+const deleteUser = (id) => {
+  return new Promise((resolve, reject) => {
+    const sql = `delete from users where id=$1;`
+    db.query(sql, [id], (err,result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
 
 
 module.exports = {
@@ -119,5 +132,6 @@ module.exports = {
   checkEmail,
   checkPassword,
   editUsers,
-  changePassword
+  changePassword,
+  deleteUser
 };

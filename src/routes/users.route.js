@@ -11,7 +11,8 @@ usersRoute.patch('/editpassword', authentication.checkToken, usersController.edi
 usersRoute.get('/private', authentication.checkToken, usersController.privateAccess);
 usersRoute.get('/:id', usersController.getUserData);
 usersRoute.patch('/requestreset', usersController.reqResetPassword);
-usersRoute.patch('/resetpassword', usersController.resetPassword)
+usersRoute.patch('/resetpassword', usersController.resetPassword);
+usersRoute.delete('/delete/:id', usersController.deleteUser)
 usersRoute.patch('/', authentication.checkToken, usersController.editUsers);
 usersRoute.get('/', usersController.getDataAllUser);
 
