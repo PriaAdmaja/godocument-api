@@ -188,9 +188,11 @@ const editPassword = async (req, res) => {
       return res.status(401).json({
         msg: "Try with another password",
       });
-    }
+    };
+    //encrypting new password
+    const encryptedPassword = await bcrypt.hash(newPassword, 10);
     //change password
-    await userModels.changePassword(newPassword, id);
+    await userModels.changePassword(encryptedPassword, id);
     res.status(201).json({
       msg: "Password changed",
     });
@@ -275,8 +277,14 @@ const resetPassword = async (req, res) => {
         msg: "Pleace check your otp!",
       });
     };
+    //encrypting new password
+    const encryptedPassword = await bcrypt.hash(password, 10)
     //change password
-    await userModels.changePassword(password, dataUser.rows[0].id)
+    const newPassword = {
+      password: encryptedPassword,
+      otp: null
+    }
+    await userModels.editUsers(newPassword, dataUser.rows[0].id)
     res.status(200).json({
       msg: "Success reset password",
     });
@@ -286,7 +294,11 @@ const resetPassword = async (req, res) => {
     res.status(500).json({
       msg: "Internal server error",
     });
-  }
+  };
+};
+
+const deleteUser = () => {
+
 }
 
 module.exports = {
