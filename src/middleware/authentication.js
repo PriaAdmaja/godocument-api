@@ -19,7 +19,7 @@ const checkToken = async (req, res, next) => {
             msg: "Invalid token"
         });
     };
-    await redisClient.disconnect();
+    await redisClient.quit();
 
     jwt.verify(token, process.env.JWTSECRET, (err, payload) => {
         if (err && err.name) {
@@ -33,6 +33,7 @@ const checkToken = async (req, res, next) => {
             });
         };
         req.authInfo = payload;
+        req.token = token;
         next()
     });
 };

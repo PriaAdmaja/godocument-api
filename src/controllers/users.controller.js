@@ -1,7 +1,8 @@
 const userModels = require("../models/users.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { transporter } = require('../configs/nodemailer')
+const { transporter } = require('../configs/nodemailer');
+const redisClient = require('../configs/redis')
 
 const createUsers = async (req, res) => {
   try {
@@ -138,6 +139,25 @@ const login = async (req, res) => {
   }
 };
 
+const logout = async(req, res) => {
+  try {
+    await redisClient.connect();
+    const { authInfo, token } = req;
+    const tokenKey = `bl_${token}`;
+    await redisClient.set(tokenKey, token);
+    await redisClient.expireAt(tokenKey, authInfo.exp);
+    await redisClient.quit();
+    res.status(200).json({
+        msg: 'Token invalidated'
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+        msg: "Internal server error"
+    })
+  }
+}
+
 const editUsers = async (req, res) => {
   try {
     const { id } = req.authInfo;
@@ -169,7 +189,6 @@ const editPassword = async (req, res) => {
         msg: "Try with another password",
       });
     }
-
     //change password
     await userModels.changePassword(newPassword, id);
     res.status(201).json({
@@ -198,8 +217,16 @@ const privateAccess = (req, res) => {
 const reqResetPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    //check email on db
     const userData = await userModels.checkEmail(email);
+    if(!userData.rows[0]) {
+      return res.status(404).json({
+        msg: 'Email is not registered'
+      });
+    };
     const { id } = userData.rows[0];
+
+    //create otp
     const char = `0987654321`;
     const otpLength = 5;
     let otp = ``;
@@ -209,15 +236,23 @@ const reqResetPassword = async (req, res) => {
     const newData = {
       otp,
     };
+
+    //add otp on db
     await userModels.editUsers(newData, id);
+
+    //send otp to email
     const message = {
       from: "godocument63@gmail.com",
       to: email,
       subject: "GoDocument Reset Password",
       text: `Your OTP is ${otp}`
-    }
+    };
     const sendMail = await transporter.sendMail(message);
-    console.log(sendMail);
+    if(!sendMail.messageId) {
+      return res.status(201).json({
+        msg: "Failed to send to your email",
+      });
+    };
     res.status(201).json({
       msg: "Pleace check your email",
     });
@@ -234,6 +269,7 @@ module.exports = {
   getUserData,
   createUsers,
   login,
+  logout,
   editUsers,
   editPassword,
   privateAccess,
