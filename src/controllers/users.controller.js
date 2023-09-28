@@ -269,6 +269,11 @@ const reqResetPassword = async (req, res) => {
 const resetPassword = async (req, res) => {
   try {
     const { email, otp, password} = req.body;
+    if(!email || !otp || !password) {
+      return res.status(405).json({
+        msg: 'Uncomplete form!'
+      });
+    };
     //get data user
     const dataUser = await userModels.checkEmail(email);
     //check otp
@@ -297,9 +302,14 @@ const resetPassword = async (req, res) => {
   };
 };
 
-const deleteUser = () => {
+// const deleteUser = asyng(req, res) => {
+//   try {
+//     const { id } = req.params;
 
-}
+//   } catch (error) {
+    
+//   }
+// }
 
 module.exports = {
   getDataAllUser,

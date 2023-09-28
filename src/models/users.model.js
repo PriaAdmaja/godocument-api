@@ -69,6 +69,7 @@ const editUsers = (body, id) => {
   return new Promise((resolve, reject) => {
     const { name, biodata, password, otp } = body;
     const dataAvail = [];
+    console.log(`otp ${otp}`);
     if (password && password !== '') {
       dataAvail.push("password=");
     };
@@ -78,13 +79,14 @@ const editUsers = (body, id) => {
     if(biodata && biodata !== '') {
       dataAvail.push("biodata=");
     };
-    if(otp && otp !== '') {
+    if(otp === null || otp !== '' ) {
       dataAvail.push("otp=");
     };
     const dataQuery = dataAvail.map((data, i) => `${data}$${i + 1}`).join(`, `);
     const rawValues = [password, name, biodata, otp, id];
-    const values = rawValues.filter((d) => d);
+    const values = rawValues.filter((d) => d || d === null);
     let sql = `update users set ${dataQuery} where id=$${values.length} returning email, name, biodata;`;
+    console.log(values);
     db.query(sql, values, (err, result) => {
       if (err) {
         reject(err);
