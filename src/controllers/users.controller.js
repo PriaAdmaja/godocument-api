@@ -7,21 +7,18 @@ const redisClient = require('../configs/redis')
 const createUsers = async (req, res) => {
   try {
     const { email, password, name, role } = req.body;
-
     //check form
     if (!email || !password || !name || !role) {
       return res.status(401).json({
         msg: "Incomplete register form data",
       });
     }
-
     //check password strength
     if (password.length < 8) {
       return res.status(401).json({
         msg: "Need longer password",
       });
     }
-
     //check double email
     const checkEmail = await userModels.checkEmail(email);
     if (checkEmail.rows[0]) {
@@ -29,10 +26,8 @@ const createUsers = async (req, res) => {
         msg: "Email already exist",
       });
     }
-
     //encrypting password
     const encryptedPassword = await bcrypt.hash(password, 10);
-
     //save to db
     const result = await userModels.createUsers(
       email,
@@ -91,18 +86,15 @@ const getUserData = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     //check form
     if (!email && !password) {
       return res.status(401).json({
         msg: "Input your email & password",
       });
-    }
-
+    };
     //get data from db
     const userData = await userModels.checkEmail(email);
     const dbData = userData.rows[0];
-
     //check password
     const checkPassword = await bcrypt.compare(password, dbData.password);
     if (!checkPassword) {
@@ -110,7 +102,6 @@ const login = async (req, res) => {
         msg: "Try with another email/password",
       });
     }
-
     //create token
     const payload = {
       id: dbData.id,
@@ -177,6 +168,11 @@ const editUsers = async (req, res) => {
 const editPassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
+    if(!oldPassword && !newPassword) {
+      return res.status(405).json({
+        msg: 'Uncomplete form!'
+      });
+    };
     const { id } = req.authInfo;
     //check password
     const dbPassword = await userModels.checkPassword(id);
@@ -219,6 +215,11 @@ const privateAccess = (req, res) => {
 const reqResetPassword = async (req, res) => {
   try {
     const { email } = req.body;
+    if(!email) {
+      return res.status(405).json({
+        msg: 'Input your email'
+      });
+    };
     //check email on db
     const userData = await userModels.checkEmail(email);
     if(!userData.rows[0]) {
@@ -227,7 +228,6 @@ const reqResetPassword = async (req, res) => {
       });
     };
     const { id } = userData.rows[0];
-
     //create otp
     const char = `0987654321`;
     const otpLength = 5;
@@ -238,10 +238,8 @@ const reqResetPassword = async (req, res) => {
     const newData = {
       otp,
     };
-
     //add otp on db
     await userModels.editUsers(newData, id);
-
     //send otp to email
     const message = {
       from: "godocument63@gmail.com",
