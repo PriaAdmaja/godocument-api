@@ -38,10 +38,28 @@ const checkToken = async (req, res, next) => {
     });
 };
 
-const adminRoute = (req, res) => {
-    
-}
+const spvAccess = (req, res, next) => {
+    const { role } = req.authInfo;
+    if(role == 1) {
+        return res.status(405).json({
+            msg: `You are not supervisor!`
+        });
+    };
+    next();
+};
+
+const adminAccess = (req, res, next) => {
+    const { role } = req.authInfo;
+    if(role == 1 || role == 2) {
+        return res.status(405).json({
+            msg: `You are not admin!`
+        });
+    };
+    next();
+};
 
 module.exports = {
-    checkToken
+    checkToken,
+    spvAccess,
+    adminAccess
 }
