@@ -21,7 +21,7 @@ const checkToken = async (req, res, next) => {
     };
     await redisClient.disconnect();
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+    jwt.verify(token, process.env.JWTSECRET, (err, payload) => {
         if (err && err.name) {
             return res.status(403).json({
                 msg: err.message
@@ -33,9 +33,12 @@ const checkToken = async (req, res, next) => {
             });
         };
         req.authInfo = payload;
-        req.token = token;
         next()
     });
+};
+
+const adminRoute = (req, res) => {
+    
 }
 
 module.exports = {

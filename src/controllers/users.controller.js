@@ -1,6 +1,7 @@
 const userModels = require("../models/users.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { transporter } = require('../configs/nodemailer')
 
 const createUsers = async (req, res) => {
   try {
@@ -50,6 +51,42 @@ const createUsers = async (req, res) => {
   }
 };
 
+const getDataAllUser = async (req, res) => {
+  try {
+    const result = await userModels.getDataAllUser();
+    res.status(200).json({
+      msg: "Success get data",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+};
+
+const getUserData = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await userModels.getUserData(id);
+    if (!result.rows[0]) {
+      return res.status(200).json({
+        msg: "User not found",
+      });
+    }
+    res.status(200).json({
+      msg: "Success get data",
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+};
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -77,6 +114,7 @@ const login = async (req, res) => {
     const payload = {
       id: dbData.id,
       email: dbData.email,
+      role: dbData.role,
     };
     const jwtOption = {
       expiresIn: "1h",
@@ -87,11 +125,8 @@ const login = async (req, res) => {
         msg: "Welcome",
         data: {
           token,
-          id: dbData.id,
-          email: dbData.email,
           name: dbData.name,
           avatar: dbData.avatar_url,
-          role: dbData.role,
         },
       });
     });
@@ -105,8 +140,8 @@ const login = async (req, res) => {
 
 const editUsers = async (req, res) => {
   try {
-    const { body, params } = req;
-    const result = await userModels.editUsers(body, params.id);
+    const { id } = req.authInfo;
+    const result = await userModels.editUsers(req.body, id);
     res.status(201).json({
       data: result.rows,
       msg: "Account updated",
@@ -119,13 +154,16 @@ const editUsers = async (req, res) => {
   }
 };
 
-const editPassword = async(req, res) => {
+const editPassword = async (req, res) => {
   try {
-    const {body, params} = req;
-    const {newPassword, oldPassword} = body
+    const { oldPassword, newPassword } = req.body;
+    const { id } = req.authInfo;
     //check password
-    const dbPassword = await userModels.checkPassword(params.id);
-    const checkPassword = await bcrypt.compare(oldPassword, dbPassword.rows[0].password);
+    const dbPassword = await userModels.checkPassword(id);
+    const checkPassword = await bcrypt.compare(
+      oldPassword,
+      dbPassword.rows[0].password
+    );
     if (!checkPassword) {
       return res.status(401).json({
         msg: "Try with another password",
@@ -133,7 +171,7 @@ const editPassword = async(req, res) => {
     }
 
     //change password
-    await userModels.changePassword(newPassword, params.id)
+    await userModels.changePassword(newPassword, id);
     res.status(201).json({
       msg: "Password changed",
     });
@@ -143,11 +181,61 @@ const editPassword = async(req, res) => {
       msg: "Internal server error",
     });
   }
-}
+};
+
+const privateAccess = (req, res) => {
+  const { id, email, role } = req.authInfo;
+  res.status(200).json({
+    payload: {
+      id,
+      email,
+      role,
+    },
+    msg: "OK",
+  });
+};
+
+const reqResetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const userData = await userModels.checkEmail(email);
+    const { id } = userData.rows[0];
+    const char = `0987654321`;
+    const otpLength = 5;
+    let otp = ``;
+    for (let i = 0; i < otpLength; i++) {
+      otp += char[Math.floor(Math.random() * char.length)];
+    }
+    const newData = {
+      otp,
+    };
+    await userModels.editUsers(newData, id);
+    const message = {
+      from: "godocument63@gmail.com",
+      to: email,
+      subject: "GoDocument Reset Password",
+      text: `Your OTP is ${otp}`
+    }
+    const sendMail = await transporter.sendMail(message);
+    console.log(sendMail);
+    res.status(201).json({
+      msg: "Pleace check your email",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+};
 
 module.exports = {
+  getDataAllUser,
+  getUserData,
   createUsers,
   login,
   editUsers,
-  editPassword
+  editPassword,
+  privateAccess,
+  reqResetPassword,
 };
