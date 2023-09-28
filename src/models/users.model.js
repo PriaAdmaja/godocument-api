@@ -41,7 +41,7 @@ const getUserData = (id) => {
 
 const checkEmail = (email) => {
   return new Promise((resolve, reject) => {
-    const sql = `select email, name, id, avatar_url, password, role from users u where email = $1;`;
+    const sql = `select email, name, id, avatar_url, password, role, otp from users u where email = $1;`;
     db.query(sql, [email], (err, result) => {
       if (err) {
         reject(err);

@@ -264,6 +264,31 @@ const reqResetPassword = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password} = req.body;
+    //get data user
+    const dataUser = await userModels.checkEmail(email);
+    //check otp
+    if(dataUser.rows[0].otp !== otp) {
+      return res.status(200).json({
+        msg: "Pleace check your otp!",
+      });
+    };
+    //change password
+    await userModels.changePassword(password, dataUser.rows[0].id)
+    res.status(200).json({
+      msg: "Success reset password",
+    });
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+}
+
 module.exports = {
   getDataAllUser,
   getUserData,
@@ -274,4 +299,5 @@ module.exports = {
   editPassword,
   privateAccess,
   reqResetPassword,
+  resetPassword
 };

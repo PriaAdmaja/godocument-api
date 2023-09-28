@@ -10,7 +10,8 @@ usersRoute.post('/logout', authentication.checkToken, usersController.logout)
 usersRoute.patch('/editpassword', authentication.checkToken, usersController.editPassword);
 usersRoute.get('/private', authentication.checkToken, usersController.privateAccess);
 usersRoute.get('/:id', usersController.getUserData);
-usersRoute.patch('/resetpassword', usersController.reqResetPassword);
+usersRoute.patch('/requestreset', usersController.reqResetPassword);
+usersRoute.patch('/resetpassword', usersController.resetPassword)
 usersRoute.patch('/', authentication.checkToken, usersController.editUsers);
 usersRoute.get('/', usersController.getDataAllUser);
 
