@@ -23,11 +23,13 @@ const getAllDocument = async (req, res) => {
     if(!result.rows[0]) {
         return res.status(200).json({
             msg: 'Data not founds',
-            data: result.rows[0]
+            data: []
         });
     };
+    const meta = await documentModels.getMetaAllDocument(req.query);
     res.status(200).json({
         msg: "Succes get data",
+        meta,
         data: result.rows
     });
   } catch (error) {
@@ -35,7 +37,7 @@ const getAllDocument = async (req, res) => {
     res.status(500).json({
       msg: "Internal server error",
     });
-  }
+  };
 };
 
 module.exports = {

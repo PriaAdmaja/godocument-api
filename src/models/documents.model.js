@@ -66,7 +66,75 @@ const getAllDocument = (data) => {
   });
 };
 
+const getMetaAllDocument = (data) => {
+  return new Promise((resolve, reject) => {
+    const { title, statusId, userId, sort, limit, page } = data;
+    const filterData = [];
+    const endpoint = [];
+    let sql = `select count(*) as total_document from documents d join status s on d.status_id = s.id `;
+    //filter
+    if (title && title !== "") {
+      filterData.push(`lower(d.title) like lower('%${title}%')`);
+      endpoint.push(`title=${title}`);
+    }
+    if (statusId && statusId !== "") {
+      filterData.push(`d.status_id = ${statusId}`);
+      endpoint.push(`statusId=${statusId}`);
+    }
+    if (userId && userId !== "") {
+      filterData.push(`d.users_id = ${userId}`);
+      endpoint.push(`userId=${userId}`);
+    }
+    const filterFix = filterData.join(" and ");
+    if (filterFix) {
+      sql += `where ${filterFix} `;
+    }
+    db.query(sql, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      const totalDocument = Number(result.rows[0].total_document);
+      const dataPage = Number(page || 1);
+      const dataLimit = Number(limit || 100);
+      const totalPage = Math.ceil(totalDocument / dataLimit);
+      switch (sort) {
+        case "idAsc":
+          endpoint.push(`sort=idAsc`);
+          break;
+        case "idDesc":
+          endpoint.push(`sort=idDesc`);
+          break;
+        case "titleAsc":
+          endpoint.push(`sort=titleAsc`);
+          break;
+        case "titleDesc":
+          endpoint.push(`sort=titleDesc`);
+          break;
+      }
+      if (limit) {
+        endpoint.push(`limit=${limit}`);
+      }
+      let prev = `/document?${endpoint.join("&")}&page=${dataPage - 1}`;
+      let next = `/document?${endpoint.join("&")}&page=${dataPage + 1}`;
+      if (dataPage === 1) {
+        prev = null;
+      }
+      if (dataPage === totalPage) {
+        next = null;
+      }
+      const meta = {
+        totalDocument,
+        totalPage,
+        prev,
+        next
+    }
+    resolve(meta)
+    });
+  });
+};
+
 module.exports = {
   createDocument,
   getAllDocument,
+  getMetaAllDocument,
 };
