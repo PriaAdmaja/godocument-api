@@ -2,7 +2,7 @@ const db = require("../configs/postgresql");
 
 const createUsers = (email, password, name, role) => {
   return new Promise((resolve, reject) => {
-    const sql = `insert into users ("email", "password", "name", "role") values ($1, $2, $3, $4) returning email;`;
+    const sql = `insert into users ("email", "password", "name", "roles_id", "created_at") values ($1, $2, $3, $4, now()) returning email;`;
     const values = [email, password, name, role];
     db.query(sql, values, (err, result) => {
       if (err) {
@@ -15,7 +15,7 @@ const createUsers = (email, password, name, role) => {
 
 const getDataAllUser = () => {
   return new Promise((resolve, reject) => {
-    const sql = `select id, email, name, avatar_url, biodata, "role" from users;`
+    const sql = `select id, email, name, avatar_url, biodata, roles_id from users;`
     db.query(sql, (err, result) => {
       if (err) {
         reject(err);
@@ -28,7 +28,7 @@ const getDataAllUser = () => {
 
 const getUserData = (id) => {
   return new Promise((resolve, reject) => {
-    const sql = `select id, email, name, avatar_url, biodata, "role" from users where id=$1;`;
+    const sql = `select id, email, name, avatar_url, biodata, roles_id from users where id=$1;`;
     db.query(sql, [id], (err, result) => {
       if (err) {
         reject(err);
@@ -41,7 +41,7 @@ const getUserData = (id) => {
 
 const checkEmail = (email) => {
   return new Promise((resolve, reject) => {
-    const sql = `select email, name, id, avatar_url, password, role, otp from users u where email = $1;`;
+    const sql = `select email, name, id, avatar_url, password, roles_id, otp from users u where email = $1;`;
     db.query(sql, [email], (err, result) => {
       if (err) {
         reject(err);
@@ -67,9 +67,8 @@ const checkPassword = (id) => {
 
 const editUsers = (body, id) => {
   return new Promise((resolve, reject) => {
-    const { name, biodata, password, otp } = body;
+    const { name, biodata, password, otp, role } = body;
     const dataAvail = [];
-    console.log(`otp ${otp}`);
     if (password && password !== '') {
       dataAvail.push("password=");
     };
@@ -79,14 +78,16 @@ const editUsers = (body, id) => {
     if(biodata && biodata !== '') {
       dataAvail.push("biodata=");
     };
+    if(role && role !== '') {
+      dataAvail.push("roles_id=");
+    };
     if(otp === null || otp !== '' ) {
       dataAvail.push("otp=");
     };
     const dataQuery = dataAvail.map((data, i) => `${data}$${i + 1}`).join(`, `);
-    const rawValues = [password, name, biodata, otp, id];
+    const rawValues = [password, name, biodata, role, otp, id];
     const values = rawValues.filter((d) => d || d === null);
     let sql = `update users set ${dataQuery} where id=$${values.length} returning email, name, biodata;`;
-    console.log(values);
     db.query(sql, values, (err, result) => {
       if (err) {
         reject(err);

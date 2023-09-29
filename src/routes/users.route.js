@@ -14,6 +14,6 @@ usersRoute.patch('/requestreset', usersController.reqResetPassword);
 usersRoute.patch('/resetpassword', usersController.resetPassword);
 usersRoute.delete('/delete/:id', authentication.checkToken, authentication.adminAccess, usersController.deleteUser)
 usersRoute.patch('/', authentication.checkToken, usersController.editUsers);
-usersRoute.get('/', usersController.getDataAllUser);
+usersRoute.get('/', authentication.checkToken, usersController.getDataAllUser);
 
 module.exports = usersRoute;

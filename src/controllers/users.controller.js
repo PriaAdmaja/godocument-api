@@ -106,7 +106,7 @@ const login = async (req, res) => {
     const payload = {
       id: dbData.id,
       email: dbData.email,
-      role: dbData.role,
+      role: dbData.roles_id,
     };
     const jwtOption = {
       expiresIn: "1h",
