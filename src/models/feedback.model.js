@@ -1,8 +1,8 @@
 const db = require("../configs/postgresql");
 
-const createFeedback = (data) => {
+const createFeedback = (data, userId) => {
   return new Promise((resolve, reject) => {
-    const { userId, documentId, comment } = data;
+    const { documentId, comment } = data;
     const sql = `insert into feedback (users_id, document_id, "comment") values ($1, $2, $3) returning *;`;
     const values = [userId, documentId, comment];
     db.query(sql, values, (err, result) => {
@@ -28,7 +28,7 @@ const getFeedbackByDocument = (id) => {
   });
 };
 
-const getFeedbackByUsersId = () => {
+const getFeedbackByUsersId = (id) => {
   return new Promise((resolve, reject) => {
     const sql = `select f.id, f."comment", f.created_at, f.document_id, d.title as document_title from feedback f join documents d on f.document_id = d.id where f.users_id = $1;`;
     db.query(sql, [id], (err, result) => {
@@ -43,7 +43,7 @@ const getFeedbackByUsersId = () => {
 
 const deleteFeedback = (id) => {
   return new Promise((resolve, reject) => {
-    const sql = `delete from documents where id=$1;`;
+    const sql = `delete from feedback where id=$1;`;
     db.query(sql, [id], (err, result) => {
       if (err) {
         reject(err);

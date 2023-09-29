@@ -1,4 +1,5 @@
 const documentModels = require("../models/documents.model");
+const feedbackModels = require('../models/feedback.model')
 
 const createDocument = async (req, res) => {
   try {
@@ -49,9 +50,11 @@ const getSingleDocument = async (req, res) => {
         msg: "Data not found!",
       });
     }
+    const feedback = await feedbackModels.getFeedbackByDocument(id);
     res.status(200).json({
       msg: "Succes get data",
       data: result.rows,
+      comment: feedback.rows
     });
   } catch (error) {
     console.log(error);
