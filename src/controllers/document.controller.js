@@ -14,9 +14,31 @@ const createDocument = async (req, res) => {
     res.status(500).json({
       msg: "Internal server error",
     });
-  };
+  }
+};
+
+const getAllDocument = async (req, res) => {
+  try {
+    const result = await documentModels.getAllDocument(req.query);
+    if(!result.rows[0]) {
+        return res.status(200).json({
+            msg: 'Data not founds',
+            data: result.rows[0]
+        });
+    };
+    res.status(200).json({
+        msg: "Succes get data",
+        data: result.rows
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
 };
 
 module.exports = {
-    createDocument
-}
+  createDocument,
+  getAllDocument
+};

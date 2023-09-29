@@ -5,5 +5,6 @@ const documentController = require('../controllers/document.controller');
 const authentication = require('../middleware/authentication');
 
 documentRoute.post('/', authentication.checkToken, documentController.createDocument);
+documentRoute.get('/', authentication.checkToken, documentController.getAllDocument);
 
 module.exports = documentRoute;
