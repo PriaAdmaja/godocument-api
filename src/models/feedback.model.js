@@ -29,20 +29,34 @@ const getFeedbackByDocument = (id) => {
 };
 
 const getFeedbackByUsersId = () => {
-    return new Promise((resolve, reject) => {
-        const sql = `select f.id, f."comment", f.created_at, f.document_id, d.title as document_title from feedback f join documents d on f.document_id = d.id where f.users_id = $1;`;
-        db.query(sql, [id], (err, result) => {
-            if (err) {
-                reject(err);
-                return;
-              }
-              resolve(result);
-        })
-    })
-}
+  return new Promise((resolve, reject) => {
+    const sql = `select f.id, f."comment", f.created_at, f.document_id, d.title as document_title from feedback f join documents d on f.document_id = d.id where f.users_id = $1;`;
+    db.query(sql, [id], (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
+const deleteFeedback = (id) => {
+  return new Promise((resolve, reject) => {
+    const sql = `delete from documents where id=$1;`;
+    db.query(sql, [id], (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
 
 module.exports = {
   createFeedback,
   getFeedbackByDocument,
-  getFeedbackByUsersId
+  getFeedbackByUsersId,
+  deleteFeedback
 };
