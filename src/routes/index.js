@@ -8,6 +8,6 @@ const documentRoute = require('./document.route')
 
 masterRouter.use("/", homeRoute);
 masterRouter.use("/users", usersRoute);
-masterRouter.use("/document", documentRoute);
+masterRouter.use("/documents", documentRoute);
 
 module.exports = masterRouter;

@@ -126,9 +126,36 @@ const getMetaAllDocument = (data) => {
         totalDocument,
         totalPage,
         prev,
-        next
+        next,
+      };
+      resolve(meta);
+    });
+  });
+};
+
+const editDocument = (body, id) => {
+  return new Promise((resolve, reject) => {
+    const { title, content, statusId } = body;
+    const dataAvail = [];
+    if (title && title !== "") {
+      dataAvail.push(`title=`);
     }
-    resolve(meta)
+    if (content && content !== "") {
+      dataAvail.push(`content=`);
+    }
+    if (statusId && statusId !== "") {
+      dataAvail.push(`status_id=`);
+    }
+    const dataQuery = dataAvail.map((data, i) => `${data}$${i + 1}`).join(`, `);
+    const rawValues = [title, content, statusId];
+    const values = rawValues.filter((d) => d);
+    const sql = `update documents set ${dataQuery} where id=${id} returning *;`;
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
     });
   });
 };
@@ -137,4 +164,5 @@ module.exports = {
   createDocument,
   getAllDocument,
   getMetaAllDocument,
+  editDocument
 };

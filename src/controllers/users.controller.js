@@ -151,6 +151,12 @@ const logout = async(req, res) => {
 
 const editUsers = async (req, res) => {
   try {
+    const { name, biodata, password, otp, role } = req.body;
+    if(!name && !biodata && !password && !otp && !role) {
+      return res.status(405).json({
+        msg: 'Incomplete form!'
+      });
+    }
     const { id } = req.authInfo;
     const result = await userModels.editUsers(req.body, id);
     res.status(201).json({
@@ -170,7 +176,7 @@ const editPassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     if(!oldPassword && !newPassword) {
       return res.status(405).json({
-        msg: 'Uncomplete form!'
+        msg: 'Incomplete form!'
       });
     };
     const { id } = req.authInfo;
