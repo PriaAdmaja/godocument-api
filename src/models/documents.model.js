@@ -133,6 +133,19 @@ const getMetaAllDocument = (data) => {
   });
 };
 
+const getSingleDocument = (id) => {
+  return new Promise((resolve, reject) => {
+    const sql = `select d.id, d.users_id, d.title, d."content", d.updated_at, s.status from documents d join status s on d.status_id = s.id where d.id = $1;`;
+    db.query(sql, [id], (err, result) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
 const editDocument = (body, id) => {
   return new Promise((resolve, reject) => {
     const { title, content, statusId } = body;
@@ -160,9 +173,24 @@ const editDocument = (body, id) => {
   });
 };
 
+const deleteDocument = (id) => {
+    return new Promise((resolve, reject) => {
+        const sql = `delete from documents where id=$1;`;
+        db.query(sql, [id], (err, result) => {
+            if (err) {
+                reject(err);
+                return;
+              }
+              resolve(result);
+        });
+    });
+};
+
 module.exports = {
   createDocument,
   getAllDocument,
   getMetaAllDocument,
-  editDocument
+  getSingleDocument,
+  editDocument,
+  deleteDocument
 };

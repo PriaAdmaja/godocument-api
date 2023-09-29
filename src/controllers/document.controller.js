@@ -40,6 +40,27 @@ const getAllDocument = async (req, res) => {
   }
 };
 
+const getSingleDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await documentModels.getSingleDocument(id);
+    if (!result.rows.length) {
+      return res.status(404).json({
+        msg: "Data not found!",
+      });
+    }
+    res.status(200).json({
+      msg: "Succes get data",
+      data: result.rows,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+};
+
 const editDocument = async (req, res) => {
   try {
     const { body, params } = req;
@@ -62,8 +83,32 @@ const editDocument = async (req, res) => {
   }
 };
 
+const deleteDocument = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const checkData = await documentModels.getSingleDocument(id);
+    if (!checkData.rows[0]) {
+      return res.status(404).json({
+        msg: "Data not found!",
+      });
+    }
+    await documentModels.deleteDocument(id);
+    res.status(201).json({
+      msg: "Success delete document",
+      data: checkData.rows[0]
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   createDocument,
   getAllDocument,
   editDocument,
+  getSingleDocument,
+  deleteDocument,
 };

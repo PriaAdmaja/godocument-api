@@ -6,6 +6,8 @@ const authentication = require('../middleware/authentication');
 
 documentRoute.patch('/:id', authentication.checkToken, documentController.editDocument);
 documentRoute.post('/', authentication.checkToken, documentController.createDocument);
+documentRoute.get('/:id', authentication.checkToken, documentController.getSingleDocument)
+documentRoute.delete('/:id', authentication.checkToken, documentController.deleteDocument)
 documentRoute.get('/', authentication.checkToken, documentController.getAllDocument);
 
 module.exports = documentRoute;
