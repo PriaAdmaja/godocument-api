@@ -282,7 +282,7 @@ const resetPassword = async (req, res) => {
     const dataUser = await userModels.checkEmail(email);
     //check otp
     if(dataUser.rows[0].otp !== otp) {
-      return res.status(200).json({
+      return res.status(403).json({
         msg: "Pleace check your otp!",
       });
     };
