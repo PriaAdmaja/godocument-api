@@ -1,8 +1,8 @@
 const userModels = require("../models/users.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { transporter } = require('../configs/nodemailer');
-const redisClient = require('../configs/redis')
+const { transporter } = require("../configs/nodemailer");
+const redisClient = require("../configs/redis");
 
 const createUsers = async (req, res) => {
   try {
@@ -91,7 +91,7 @@ const login = async (req, res) => {
       return res.status(401).json({
         msg: "Input your email & password",
       });
-    };
+    }
     //get data from db
     const userData = await userModels.checkEmail(email);
     const dbData = userData.rows[0];
@@ -117,6 +117,8 @@ const login = async (req, res) => {
         msg: "Welcome",
         data: {
           token,
+          id: dbData.id,
+          email: dbData.email,
           name: dbData.name,
           avatar: dbData.avatar_url,
         },
@@ -130,7 +132,7 @@ const login = async (req, res) => {
   }
 };
 
-const logout = async(req, res) => {
+const logout = async (req, res) => {
   try {
     await redisClient.connect();
     const { authInfo, token } = req;
@@ -139,22 +141,22 @@ const logout = async(req, res) => {
     await redisClient.expireAt(tokenKey, authInfo.exp);
     await redisClient.quit();
     res.status(200).json({
-        msg: 'Token invalidated'
-    })
+      msg: "Token invalidated",
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
-        msg: "Internal server error"
-    })
+      msg: "Internal server error",
+    });
   }
-}
+};
 
 const editUsers = async (req, res) => {
   try {
     const { name, biodata, password, otp, role } = req.body;
-    if(!name && !biodata && !password && !otp && !role) {
+    if (!name && !biodata && !password && !otp && !role) {
       return res.status(405).json({
-        msg: 'Incomplete form!'
+        msg: "Incomplete form!",
       });
     }
     const { id } = req.authInfo;
@@ -174,11 +176,11 @@ const editUsers = async (req, res) => {
 const editPassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    if(!oldPassword && !newPassword) {
+    if (!oldPassword && !newPassword) {
       return res.status(405).json({
-        msg: 'Incomplete form!'
+        msg: "Incomplete form!",
       });
-    };
+    }
     const { id } = req.authInfo;
     //check password
     const dbPassword = await userModels.checkPassword(id);
@@ -190,7 +192,7 @@ const editPassword = async (req, res) => {
       return res.status(401).json({
         msg: "Try with another password",
       });
-    };
+    }
     //encrypting new password
     const encryptedPassword = await bcrypt.hash(newPassword, 10);
     //change password
@@ -221,18 +223,18 @@ const privateAccess = (req, res) => {
 const reqResetPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    if(!email) {
+    if (!email) {
       return res.status(405).json({
-        msg: 'Input your email'
+        msg: "Input your email",
       });
-    };
+    }
     //check email on db
     const userData = await userModels.checkEmail(email);
-    if(!userData.rows[0]) {
+    if (!userData.rows[0]) {
       return res.status(404).json({
-        msg: 'Email is not registered'
+        msg: "Email is not registered",
       });
-    };
+    }
     const { id } = userData.rows[0];
     //create otp
     const char = `0987654321`;
@@ -251,14 +253,14 @@ const reqResetPassword = async (req, res) => {
       from: "godocument63@gmail.com",
       to: email,
       subject: "GoDocument Reset Password",
-      text: `Your OTP is ${otp}`
+      text: `Your OTP is ${otp}`,
     };
     const sendMail = await transporter.sendMail(message);
-    if(!sendMail.messageId) {
+    if (!sendMail.messageId) {
       return res.status(201).json({
         msg: "Failed to send to your email",
       });
-    };
+    }
     res.status(201).json({
       msg: "Pleace check your email",
     });
@@ -272,63 +274,61 @@ const reqResetPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
-    const { email, otp, password} = req.body;
-    if(!email || !otp || !password) {
+    const { email, otp, password } = req.body;
+    if (!email || !otp || !password) {
       return res.status(405).json({
-        msg: 'Uncomplete form!'
+        msg: "Uncomplete form!",
       });
-    };
+    }
     //get data user
     const dataUser = await userModels.checkEmail(email);
     //check otp
-    if(dataUser.rows[0].otp !== otp) {
+    if (dataUser.rows[0].otp !== otp) {
       return res.status(403).json({
         msg: "Pleace check your otp!",
       });
-    };
+    }
     //encrypting new password
-    const encryptedPassword = await bcrypt.hash(password, 10)
+    const encryptedPassword = await bcrypt.hash(password, 10);
     //change password
     const newPassword = {
       password: encryptedPassword,
-      otp: null
-    }
-    await userModels.editUsers(newPassword, dataUser.rows[0].id)
+      otp: null,
+    };
+    await userModels.editUsers(newPassword, dataUser.rows[0].id);
     res.status(200).json({
       msg: "Success reset password",
     });
-    
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      msg: "Internal server error",
-    });
-  };
-};
-
-const deleteUser = async(req, res) => {
-  try {
-    const { id } = req.params;
-    //check user availability
-    const userData = await userModels.getUserData(id);
-    if(!userData.rows[0]) {
-      return res.status(404).json({
-        msg: 'User not found!'
-      });
-    };
-    //deleting user
-    await userModels.deleteUser(id)
-    res.status(200).json({
-      msg: "Success deleting user",
-    });
-
   } catch (error) {
     console.log(error);
     res.status(500).json({
       msg: "Internal server error",
     });
   }
-}
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    //check user availability
+    const userData = await userModels.getUserData(id);
+    if (!userData.rows[0]) {
+      return res.status(404).json({
+        msg: "User not found!",
+      });
+    }
+    //deleting user
+    await userModels.deleteUser(id);
+    res.status(200).json({
+      msg: "Success deleting user",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
+};
 
 module.exports = {
   getDataAllUser,
@@ -341,5 +341,5 @@ module.exports = {
   privateAccess,
   reqResetPassword,
   resetPassword,
-  deleteUser
+  deleteUser,
 };

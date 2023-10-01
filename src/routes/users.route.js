@@ -6,7 +6,7 @@ const authentication = require('../middleware/authentication')
 
 usersRoute.post('/register', usersController.createUsers);
 usersRoute.post('/login', usersController.login);
-usersRoute.post('/logout', authentication.checkToken, usersController.logout)
+usersRoute.post('/logout/', authentication.checkToken, usersController.logout)
 usersRoute.patch('/editpassword', authentication.checkToken, usersController.editPassword);
 usersRoute.get('/private', authentication.checkToken, usersController.privateAccess);
 usersRoute.get('/:id', authentication.checkToken, authentication.spvAccess, usersController.getUserData);
