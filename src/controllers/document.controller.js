@@ -46,8 +46,9 @@ const getSingleDocument = async (req, res) => {
     const { id } = req.params;
     const result = await documentModels.getSingleDocument(id);
     if (!result.rows.length) {
-      return res.status(404).json({
-        msg: "Data not found!",
+      return res.status(200).json({
+        msg: "Daocument not found!",
+        data: []
       });
     }
     const feedback = await feedbackModels.getFeedbackByDocument(id);
