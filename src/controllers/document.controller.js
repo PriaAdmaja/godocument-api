@@ -47,7 +47,7 @@ const getSingleDocument = async (req, res) => {
     const result = await documentModels.getSingleDocument(id);
     if (!result.rows.length) {
       return res.status(200).json({
-        msg: "Daocument not found!",
+        msg: "Document not found!",
         data: []
       });
     }
