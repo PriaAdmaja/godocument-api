@@ -14,10 +14,7 @@ const generatePdf = async (req, res) => {
     document.y = 300
     document.text(content);
     document.pipe(res);
-    document.end()
-    // res.status(200).json({
-    //     msg: 'Succes create pdf'
-    // });
+    document.end();
   } catch (error) {
     console.log(error);
     res.status(500).json({
