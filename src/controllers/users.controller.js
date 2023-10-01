@@ -121,6 +121,7 @@ const login = async (req, res) => {
           email: dbData.email,
           name: dbData.name,
           avatar: dbData.avatar_url,
+          role: dbData.roles_id,
         },
       });
     });
