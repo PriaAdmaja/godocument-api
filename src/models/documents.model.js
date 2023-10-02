@@ -135,7 +135,7 @@ const getMetaAllDocument = (data) => {
 
 const getSingleDocument = (id) => {
   return new Promise((resolve, reject) => {
-    const sql = `select d.id, d.users_id, d.title, d."content", d.updated_at, s.status from documents d join status s on d.status_id = s.id where d.id = $1;`;
+    const sql = `select d.id, d.users_id, d.title, d.status_id, d."content", d.updated_at, s.status from documents d join status s on d.status_id = s.id where d.id = $1;`;
     db.query(sql, [id], (err, result) => {
       if (err) {
         reject(err);
