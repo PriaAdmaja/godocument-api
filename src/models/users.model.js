@@ -28,7 +28,7 @@ const getDataAllUser = () => {
 
 const getUserData = (id) => {
   return new Promise((resolve, reject) => {
-    const sql = `select id, email, name, avatar_url, biodata, roles_id from users where id=$1;`;
+    const sql = `select u.id, u.email, u.name, u.avatar_url, u.biodata, u.roles_id, r."name" as "role" from users u join roles r on u.roles_id = r.id  where u.id=$1;`;
     db.query(sql, [id], (err, result) => {
       if (err) {
         reject(err);
