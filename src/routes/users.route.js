@@ -9,7 +9,7 @@ usersRoute.post('/login', usersController.login);
 usersRoute.post('/logout/', authentication.checkToken, usersController.logout)
 usersRoute.patch('/editpassword', authentication.checkToken, usersController.editPassword);
 usersRoute.get('/private', authentication.checkToken, usersController.privateAccess);
-usersRoute.get('/:id', authentication.checkToken, authentication.spvAccess, usersController.getUserData);
+usersRoute.get('/:id', authentication.checkToken, usersController.getUserData);
 usersRoute.patch('/requestreset', usersController.reqResetPassword);
 usersRoute.patch('/resetpassword', usersController.resetPassword);
 usersRoute.delete('/delete/:id', authentication.checkToken, authentication.adminAccess, usersController.deleteUser)
